@@ -1,0 +1,24 @@
+steps:
+# Installing dependencies
+- name: 'gcr.io/cloud-builders/npm'
+  id: node-dependency-installation
+  dir: SocialDeskingFrontend
+  args: ['install']
+
+# Build React code
+- name: 'gcr.io/cloud-builders/npm'
+  id: react-app-build
+  dir: SocialDeskingFrontend
+  waitFor:
+    - node-dependency-installation
+  args: ['run','build']
+
+ 
+# Deployment to app engine
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  dir: SocialDeskingFrontend
+  waitFor:
+    - react-app-build
+  entrypoint: 'bash'
+  args: ['-c', 'gcloud config set app/cloud_build_timeout 1600 && gcloud app deploy']
+  timeout: '1600s'
